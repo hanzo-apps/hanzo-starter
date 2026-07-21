@@ -19,8 +19,14 @@ data:
   schema: schema.sql
 
 # Injected into the build as import.meta.env.* (see .env.example / README).
-# The deploy pipeline overrides VITE_HANZO_BASE_URL with the provisioned URL and
-# ensures VITE_HANZO_CLIENT_ID's IAM client allows this origin's /auth/callback.
+# The deploy pipeline overrides these per publish: VITE_HANZO_BASE_URL with the
+# provisioned Base URL, and VITE_HANZO_CLIENT_ID with this fork's OWN IAM client
+# `<org>-app-<slug>` — which Hanzo Cloud provisions at publish with the EXACT
+# redirect https://<slug>.hanzo.app/auth/callback (never a *.hanzo.app wildcard on
+# a shared client — that is a token-theft surface). The `hanzo-app` value below is
+# only a fail-closed fallback for local dev: the shared client has no
+# <slug>.hanzo.app redirect, so an un-overridden publish simply can't sign in
+# (it never leaks a code to the wrong app).
 env:
   VITE_HANZO_IAM_URL: https://hanzo.id
   VITE_HANZO_CLIENT_ID: hanzo-app

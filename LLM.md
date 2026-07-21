@@ -41,10 +41,14 @@ Keep it minimal and REAL — every surface must build and run, no fabricated UI.
 - On publish, `schema.sql` → `provisionBaseFromDDL` creates the collections
   (org-scoped, IAM-native). Runtime read/write is browser → `VITE_HANZO_BASE_URL`
   with the IAM token.
-- **IAM redirect registration** is the one external requirement: the IAM client
-  (`VITE_HANZO_CLIENT_ID`, default `hanzo-app`) must allow this origin's
-  `/auth/callback`. Production needs a `https://*.hanzo.app/auth/callback`
-  wildcard on the shared client (or a per-app `hanzo-<app>` client).
+- **Per-app IAM client** is auto-provisioned at publish: Hanzo Cloud upserts this
+  fork its OWN client `<org>-app-<slug>` with the EXACT redirect
+  `https://<slug>.hanzo.app/auth/callback` (cloud `clients/projects` onPublish →
+  IAM `/v1/iam/admin/applications/upsert`), and the deploy injects
+  `VITE_HANZO_CLIENT_ID=<org>-app-<slug>`. Redirect matching is exact — never a
+  `*.hanzo.app` wildcard on a shared client, which would let any fork receive
+  another app's auth code (account takeover). The `hanzo-app` fallback fails
+  closed (no `<slug>.hanzo.app` redirect on the shared client).
 
 ## Proven
 
